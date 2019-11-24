@@ -19,8 +19,6 @@ apply plugin: 'org.jetbrains.kotlin.multiplatform'
 repositories {
     mavenCentral()
     mavenLocal()
-    jcenter()
-//    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
 }
 
 group = GROUP
@@ -31,7 +29,7 @@ configurations {
 }
 
 kotlin {
-//
+//    macosX64("nativeCommon")
     jvm()
     js() {
         nodejs()
@@ -44,27 +42,22 @@ kotlin {
             }
         }*/
     }
-
-    if (ideaActive) {
-        macosX64("darwin")
-    } else {
-        macosX64()
-        iosArm32()
-        iosArm64()
-        iosX64()
-        linuxX64()
-        linuxArm32Hfp()
-        linuxMips32()
-        //    androidNativeArm32()
-        //    androidNativeArm64()
-        mingwX64()
-    }
+    macosX64()
+    iosArm32()
+    iosArm64()
+    iosX64()
+    linuxX64()
+    linuxArm32Hfp()
+    linuxMips32()
+//    androidNativeArm32()
+//    androidNativeArm64()
+    mingwX64()
     
     sourceSets {
         commonMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
-                implementation "org.jetbrains.kotlinx:atomicfu-common:0.14.1"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.2-native-mt-1"
             }
         }
 
@@ -72,7 +65,7 @@ kotlin {
             dependencies {
         		implementation 'org.jetbrains.kotlin:kotlin-test-common'
         		implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
-            implementation 'co.touchlab:testhelp:0.2.8'
+                implementation 'co.touchlab:testhelp:0.2.8'
             }
         }
 
@@ -111,30 +104,40 @@ kotlin {
             dependsOn commonTest
         }
 
-        if (!ideaActive) {
-            configure([targets.iosX64,
-                       targets.iosArm32,
-                       targets.iosArm64,
-                       targets.macosX64]) {
-                compilations.main.source(sourceSets.nativeCommonMain)
-                compilations.test.source(sourceSets.nativeCommonTest)
-            }
+        darwinMain {
+            dependsOn nativeCommonMain
+        }
 
-            configure([targets.linuxX64,
-                       targets.linuxArm32Hfp,
-                       targets.linuxMips32
+        pthreadMain {
+            dependsOn nativeCommonMain
+        }
+
+        mingwMain {
+            dependsOn nativeCommonMain
+        }
+
+        configure([targets.iosX64,
+                   targets.iosArm32,
+                   targets.iosArm64,
+                   targets.macosX64]){
+            compilations.main.source(sourceSets.darwinMain)
+            compilations.test.source(sourceSets.nativeCommonTest)
+        }
+
+        configure([targets.linuxX64,
+                   targets.linuxArm32Hfp,
+                   targets.linuxMips32
 //                   ,
 //                   targets.androidNativeArm32,
 //                   targets.androidNativeArm64
-            ]) {
-                compilations.main.source(sourceSets.nativeCommonMain)
-                compilations.test.source(sourceSets.nativeCommonTest)
-            }
+        ]) {
+            compilations.main.source(sourceSets.pthreadMain)
+            compilations.test.source(sourceSets.nativeCommonTest)
+        }
 
-            configure([targets.mingwX64]) {
-                compilations.main.source(sourceSets.nativeCommonMain)
-                compilations.test.source(sourceSets.nativeCommonTest)
-            }
+        configure([targets.mingwX64]) {
+            compilations.main.source(sourceSets.mingwMain)
+            compilations.test.source(sourceSets.nativeCommonTest)
         }
     }
 }

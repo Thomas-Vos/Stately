@@ -15,6 +15,7 @@
  */
 
 buildscript {
+    ext.ideaActive = System.getProperty('idea.active') == 'true'
     repositories {
         jcenter()
         google()
