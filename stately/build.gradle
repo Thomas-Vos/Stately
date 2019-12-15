@@ -20,7 +20,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     jcenter()
-//    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+    maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
 group = GROUP
@@ -31,30 +31,21 @@ configurations {
 }
 
 kotlin {
-//
     jvm()
     js() {
         nodejs()
-        /*browser()
-        configure([compilations.main, compilations.test]) {
-            tasks.getByName(compileKotlinTaskName).kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = 'umd'
-            }
-        }*/
     }
 
     if (ideaActive) {
-        macosX64("darwin")
+        macosX64("nativeCommon")
     } else {
         macosX64()
         iosArm32()
         iosArm64()
         iosX64()
         linuxX64()
-        linuxArm32Hfp()
-        linuxMips32()
+//        linuxArm32Hfp()
+//        linuxMips32()
         //    androidNativeArm32()
         //    androidNativeArm64()
         mingwX64()
@@ -63,15 +54,15 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+                implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:atomicfu-common:0.14.1"
             }
         }
 
         commonTest {
             dependencies {
-        		implementation 'org.jetbrains.kotlin:kotlin-test-common'
-        		implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
             implementation 'co.touchlab:testhelp:0.2.8'
             }
         }
@@ -105,6 +96,9 @@ kotlin {
 
         nativeCommonMain {
             dependsOn commonMain
+            dependencies {
+                implementation "org.jetbrains.kotlinx:atomicfu-native:0.14.1"
+            }
         }
 
         nativeCommonTest {
@@ -120,9 +114,10 @@ kotlin {
                 compilations.test.source(sourceSets.nativeCommonTest)
             }
 
-            configure([targets.linuxX64,
-                       targets.linuxArm32Hfp,
-                       targets.linuxMips32
+            configure([targets.linuxX64
+//                       ,
+//                       targets.linuxArm32Hfp,
+//                       targets.linuxMips32
 //                   ,
 //                   targets.androidNativeArm32,
 //                   targets.androidNativeArm64

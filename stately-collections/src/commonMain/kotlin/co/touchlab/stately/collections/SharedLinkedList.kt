@@ -16,12 +16,13 @@
 
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicBoolean
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.AtomicReference
-import co.touchlab.stately.concurrency.Lock
-import co.touchlab.stately.concurrency.value
 import co.touchlab.stately.freeze
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.reentrantLock
 
 /**
  * Thread safe linked list implementation for Kotlin Multiplatform. This is intended for situations where there may
@@ -31,7 +32,7 @@ import co.touchlab.stately.freeze
  */
 class SharedLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>(objectPoolSize) {
 
-  internal val version = AtomicInt(0)
+  internal val version = atomic(0)
 
   init {
     freeze()
@@ -40,7 +41,7 @@ class SharedLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>
   override fun updated() {
     val newVal = version.incrementAndGet()
     if (newVal == Int.MAX_VALUE)
-      version.set(0)
+      version.value = 0
   }
 
   override fun listIterator(): MutableListIterator<T> {
@@ -63,7 +64,7 @@ class SharedLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>
     var currentNode = ll.head.value
 
     private fun checkVersion() {
-      if (version != ll.version.get())
+      if (version != ll.version.value)
         throw ConcurrentModificationException()
     }
 
@@ -88,7 +89,7 @@ class SharedLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>
     var currentNode = ll.head.value
 
     private fun checkVersion() {
-      if (version != ll.version.get())
+      if (version != ll.version.value)
         throw ConcurrentModificationException()
     }
 
@@ -116,11 +117,11 @@ class SharedLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>
 class CopyOnIterateLinkedList<T>(objectPoolSize: Int = 0) : AbstractSharedLinkedList<T>(objectPoolSize) {
 
   private val updated: AtomicInt
-  private val lastList: AtomicReference<MutableList<T>>
+  private val lastList: AtomicRef<MutableList<T>>
 
   init {
-    updated = AtomicInt(0)
-    lastList = AtomicReference(mutableListOf<T>().freeze())
+    updated = atomic(0)
+    lastList = atomic(mutableListOf<T>().freeze())
     freeze()
   }
 
@@ -315,12 +316,12 @@ abstract class AbstractSharedLinkedList<T>(objectPoolSize:Int) : MutableList<T> 
 
   class Node<T>(val list: AbstractSharedLinkedList<T>) {
 
-    private val atomicValue: AtomicReference<T?> = AtomicReference(null)
+    private val atomicValue: AtomicRef<T?> = atomic(null)
     val nodeValue: T
       get() = atomicValue.value!!
-    val prev = AtomicReference<Node<T>?>(null)
-    val next = AtomicReference<Node<T>?>(null)
-    private val removed = AtomicBoolean(false)
+    val prev = atomic<Node<T>?>(null)
+    val next = atomic<Node<T>?>(null)
+    private val removed = atomic(false)
 
     internal fun recycle() {
       prev.value = null
@@ -450,10 +451,10 @@ abstract class AbstractSharedLinkedList<T>(objectPoolSize:Int) : MutableList<T> 
     }
   }
 
-  private var lock: Lock = Lock()
-  internal val sizeCount = AtomicInt(0)
-  internal val head = AtomicReference<Node<T>?>(null)
-  internal val tail = AtomicReference<Node<T>?>(null)
+  private var lock: ReentrantLock = reentrantLock()
+  internal val sizeCount = atomic(0)
+  internal val head = atomic<Node<T>?>(null)
+  internal val tail = atomic<Node<T>?>(null)
   internal val nodePool = ObjectPool(objectPoolSize, { Node(this) })
 
   internal fun makeNode(t: T): Node<T> {

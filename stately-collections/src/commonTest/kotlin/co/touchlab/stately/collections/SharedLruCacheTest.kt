@@ -16,14 +16,13 @@
 
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.value
 import co.touchlab.stately.freeze
 import co.touchlab.stately.isNative
-import co.touchlab.stately.isNativeFrozen
+import co.touchlab.stately.collections.isNativeFrozen
 import co.touchlab.testhelp.concurrency.MPWorker
 import co.touchlab.testhelp.concurrency.ThreadOperations
 import co.touchlab.testhelp.concurrency.currentTimeMillis
+import kotlinx.atomicfu.atomic
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -315,7 +314,7 @@ class SharedLruCacheTest {
     val CACHE_SIZE = 100
     val LOOPS = 5000
 
-    val count = AtomicInt(0)
+    val count = atomic(0)
     val ops = ThreadOperations<SharedLruCache<String, MapData>> {
       SharedLruCache(CACHE_SIZE) { count.incrementAndGet() }
     }

@@ -16,6 +16,9 @@
 
 package co.touchlab.stately.concurrency
 
+import kotlinx.atomicfu.atomic
+import kotlin.native.concurrent.ThreadLocal
+
 actual open class ThreadLocalRef<T> actual constructor() {
   private val threadLocalId = ThreadLocalIdCounter.nextThreadLocalId()
 
@@ -44,6 +47,6 @@ private object ThreadLocalState {
 }
 
 private object ThreadLocalIdCounter {
-  val threadLocalId = AtomicInt(0)
+  val threadLocalId = atomic(0)
   fun nextThreadLocalId(): Int = threadLocalId.addAndGet(1)
 }

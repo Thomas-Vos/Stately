@@ -16,13 +16,12 @@
 
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.value
 import co.touchlab.stately.freeze
-import co.touchlab.stately.isNativeFrozen
+import co.touchlab.stately.collections.isNativeFrozen
 import co.touchlab.testhelp.concurrency.MPWorker
 import co.touchlab.testhelp.concurrency.ThreadOperations
 import co.touchlab.testhelp.concurrency.currentTimeMillis
+import kotlinx.atomicfu.atomic
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -208,7 +207,7 @@ class SharedHashMapTest {
 
     val m = SharedHashMap<String, MapData>().freeze()
 
-    val count = AtomicInt(0).freeze()
+    val count = atomic(0).freeze()
 
     val start = currentTimeMillis()
 

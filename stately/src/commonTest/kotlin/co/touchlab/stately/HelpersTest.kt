@@ -41,9 +41,9 @@ class HelpersTest {
     val noFreeze = Hi("qwert")
     noFreeze.ensureNeverFrozen()
 
-    assertFalse(noFreeze.isFrozen())
+    assertFalse(noFreeze.isFrozen)
     assertFails { noFreeze.freeze() }
-    assertFalse(noFreeze.isFrozen())
+    assertFalse(noFreeze.isFrozen)
   }
 
   @Test

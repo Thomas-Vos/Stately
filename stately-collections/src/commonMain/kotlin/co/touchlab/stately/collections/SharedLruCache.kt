@@ -16,8 +16,9 @@
 
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.Lock
 import co.touchlab.stately.freeze
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.reentrantLock
 
 /**
  * Implementation of a least recently used cache, multithreading aware for kotlin multiplatform.
@@ -44,7 +45,7 @@ class SharedLruCache<K, V>(
   private val onRemove: (MutableMap.MutableEntry<K, V>) -> Unit = {}
 ) : LruCache<K, V> {
 
-  private var lock: Lock = Lock()
+  private var lock: ReentrantLock = reentrantLock()
   private val cacheMap = SharedHashMap<K, CacheEntry<K, V>>(initialCapacity = maxCacheSize)
   private val cacheList = SharedLinkedList<K>(20)
 

@@ -1,7 +1,6 @@
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.value
+import kotlinx.atomicfu.atomic
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -25,7 +24,7 @@ class ObjectPoolTest {
   @Test
   fun cleanUpBlock(){
     var poolCount = 0
-    val cleanCount = AtomicInt(0)
+    val cleanCount = atomic(0)
 
     val pool = ObjectPool(20, { PoolVal("arst ${poolCount++}") }){
       cleanCount.incrementAndGet()

@@ -24,13 +24,7 @@ expect fun <T> T.freeze(): T
 /**
  * Determine if object is frozen. Will return false on non-native platforms.
  */
-expect fun <T> T.isFrozen(): Boolean
-
-/**
- * Determine if object is frozen. Will return true on non-native platforms, which for logic is generally the outcome
- * you want.
- */
-expect fun <T> T.isNativeFrozen(): Boolean
+expect val <T> T.isFrozen: Boolean
 
 /**
  * Call on an object which should never be frozen. Will help debug when something inadvertently is.
@@ -41,5 +35,3 @@ expect fun Any.ensureNeverFrozen()
  * Are we in on a native platform?
  */
 expect val isNative: Boolean
-
-expect val isMultithreaded: Boolean

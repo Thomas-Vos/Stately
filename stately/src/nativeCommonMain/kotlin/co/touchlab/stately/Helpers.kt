@@ -21,10 +21,9 @@ import kotlin.native.concurrent.freeze
 import kotlin.native.concurrent.isFrozen
 
 actual fun <T> T.freeze(): T = this.freeze()
-actual fun <T> T.isFrozen(): Boolean = this.isFrozen
-actual fun <T> T.isNativeFrozen(): Boolean = this.isFrozen
+actual val <T> T.isFrozen: Boolean
+    get() = this.isFrozen
+
 actual fun Any.ensureNeverFrozen() = this.ensureNeverFrozen()
 
 actual val isNative: Boolean = true
-
-actual val isMultithreaded: Boolean = true

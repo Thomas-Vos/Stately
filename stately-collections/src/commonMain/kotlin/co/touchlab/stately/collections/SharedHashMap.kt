@@ -16,11 +16,12 @@
 
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.AtomicReference
-import co.touchlab.stately.concurrency.Lock
-import co.touchlab.stately.concurrency.value
+
 import co.touchlab.stately.freeze
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
 
 /**
  * Mutithreaded hashmap which uses atomic structures internally to allow sharing across threads on all variants of Kotlin.
@@ -40,10 +41,10 @@ class SharedHashMap<K, V>(initialCapacity: Int = 16, val loadFactor: Float = 0.7
     }
   }
 
-  private var lock: Lock = Lock()
+  private var lock = reentrantLock()
   private var threshold: AtomicInt
-  private val atomSize = AtomicInt(0)
-  private val buckets: AtomicReference<Array<AtomicReference<SharedLinkedList<Entry<K, V>>>>>
+  private val atomSize : AtomicInt = atomic(0)
+  private val buckets: AtomicRef<Array<AtomicRef<SharedLinkedList<Entry<K, V>>>>>
 
   internal inline fun <T> withLock(proc: () -> T): T {
     lock.lock()
@@ -59,15 +60,15 @@ class SharedHashMap<K, V>(initialCapacity: Int = 16, val loadFactor: Float = 0.7
     while (capacity < initialCapacity)
       capacity = capacity shl 1
 
-    threshold = AtomicInt((capacity.toFloat() * loadFactor).toInt())
-    buckets = AtomicReference(makeBuckets(capacity))
+    threshold = atomic((capacity.toFloat() * loadFactor).toInt())
+    buckets = atomic(makeBuckets(capacity))
 
     freeze()
   }
 
-  private fun makeBuckets(capacity: Int): Array<AtomicReference<SharedLinkedList<Entry<K, V>>>> {
+  private fun makeBuckets(capacity: Int): Array<AtomicRef<SharedLinkedList<Entry<K, V>>>> {
     return (Array(capacity) {
-      AtomicReference(SharedLinkedList<Entry<K, V>>(1).freeze())
+      atomic(SharedLinkedList<Entry<K, V>>(1).freeze())
     }).freeze()
   }
 
@@ -244,8 +245,8 @@ class SharedHashMap<K, V>(initialCapacity: Int = 16, val loadFactor: Float = 0.7
   }
 
   private fun transfer(
-    newTable: Array<AtomicReference<SharedLinkedList<Entry<K, V>>>>,
-    oldTable: Array<AtomicReference<SharedLinkedList<Entry<K, V>>>>
+    newTable: Array<AtomicRef<SharedLinkedList<Entry<K, V>>>>,
+    oldTable: Array<AtomicRef<SharedLinkedList<Entry<K, V>>>>
   ) {
     oldTable.forEach {
       it.value.iterator().forEach {
@@ -271,7 +272,7 @@ class SharedHashMap<K, V>(initialCapacity: Int = 16, val loadFactor: Float = 0.7
   }
 
   private fun findEntryList(
-    bucketArray: Array<AtomicReference<SharedLinkedList<Entry<K, V>>>>,
+    bucketArray: Array<AtomicRef<SharedLinkedList<Entry<K, V>>>>,
     key: K
   ): SharedLinkedList<Entry<K, V>> {
     val hash = rehash(key.hashCode())

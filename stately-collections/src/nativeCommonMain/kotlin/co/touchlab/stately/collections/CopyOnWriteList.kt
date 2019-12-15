@@ -17,7 +17,7 @@
 package co.touchlab.stately.collections
 
 
-import co.touchlab.stately.concurrency.Lock
+import kotlinx.atomicfu.locks.reentrantLock
 import kotlin.native.concurrent.AtomicInt
 import kotlin.native.concurrent.AtomicReference
 import kotlin.native.concurrent.freeze
@@ -25,7 +25,7 @@ import kotlin.native.concurrent.freeze
 class CopyOnWriteList<T>(elements: Collection<T>) : MutableList<T> {
 
   private val listData = AtomicReference<List<T>>(ArrayList(elements).freeze())
-  private val instanceLock = Lock()
+  private val instanceLock = reentrantLock()
 
   init {
     freeze()

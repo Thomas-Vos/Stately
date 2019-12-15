@@ -27,8 +27,8 @@ class AnnotationsTest {
   @Test
   fun testThreadLocal() {
     if (isNative) {
-      assertFalse(WillBeLocal.isFrozen())
-      assertTrue(WontBeLocal.isFrozen())
+      assertFalse(WillBeLocal.isFrozen)
+      assertTrue(WontBeLocal.isFrozen)
     }
   }
 }

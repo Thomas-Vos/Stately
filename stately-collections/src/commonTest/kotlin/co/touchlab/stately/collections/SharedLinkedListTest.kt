@@ -18,8 +18,9 @@ package co.touchlab.stately.collections
 
 import co.touchlab.stately.concurrency.value
 import co.touchlab.stately.freeze
-import co.touchlab.stately.isNativeFrozen
+import co.touchlab.stately.collections.isNativeFrozen
 import co.touchlab.testhelp.concurrency.ThreadOperations
+import kotlinx.atomicfu.atomic
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -40,7 +41,23 @@ class LinkedListTest {
   @Test
   fun testInitFrozen() {
     assertTrue(SharedLinkedList<ListData>().isNativeFrozen())
+
+
   }
+
+  data class SomeData(val s:String, val i:Int)
+
+
+  class SomeModel {
+    val atom = atomic(SomeData("abc", 123))
+    fun update(sd:SomeData){
+      atom.value = sd
+    }
+    init {
+        freeze()
+    }
+  }
+
 
   @Test
   fun add() {

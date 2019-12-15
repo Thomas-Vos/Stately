@@ -1,12 +1,12 @@
 package co.touchlab.stately.collections
 
-import co.touchlab.stately.concurrency.AtomicInt
-import co.touchlab.stately.concurrency.AtomicReference
-import co.touchlab.stately.concurrency.Lock
-import co.touchlab.stately.concurrency.value
-import co.touchlab.stately.concurrency.withLock
 import co.touchlab.stately.freeze
-import co.touchlab.stately.isNativeFrozen
+import co.touchlab.stately.isFrozen
+import co.touchlab.stately.isNative
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 
 class ObjectPool<T>(
   private val maxSize: Int,
@@ -17,15 +17,15 @@ class ObjectPool<T>(
       throw IllegalArgumentException("maxSize cannot be negative")
   }
 
-  internal val pool = Array<AtomicReference<T?>>(maxSize) {
-    AtomicReference(null)
+  internal val pool = Array<AtomicRef<T?>>(maxSize) {
+    atomic(null)
   }
 
-  private val poolIndex = AtomicInt(0)
-  private val lock = Lock()
+  private val poolIndex = atomic(0)
+  private val lock = reentrantLock()
 
   fun push(t: T): Boolean = lock.withLock {
-    if (!t.isNativeFrozen())
+    if (isNative && !t.isFrozen)
       throw IllegalStateException("Object pool entries must be frozen")
 
     if(maxSize == 0){

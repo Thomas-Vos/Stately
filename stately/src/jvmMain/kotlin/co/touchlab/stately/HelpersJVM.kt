@@ -17,9 +17,9 @@
 package co.touchlab.stately
 
 actual fun <T> T.freeze(): T = this
-actual fun <T> T.isFrozen(): Boolean = false
-actual fun <T> T.isNativeFrozen(): Boolean = true
+actual val <T> T.isFrozen: Boolean
+    get() = false
+
 actual fun Any.ensureNeverFrozen() {}
 
 actual val isNative: Boolean = false
-actual val isMultithreaded: Boolean = true
